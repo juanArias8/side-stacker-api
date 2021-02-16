@@ -3,7 +3,6 @@ from typing import List
 import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
 
 from database import crud
 from database import models
@@ -29,7 +28,7 @@ app.add_middleware(
 
 @app.get("/")
 async def get():
-    return FileResponse("static/index.html")
+    return {"message": "fast api side stacker up"}
 
 
 @app.get("/rooms/{room_name}", response_model=schemas.Room)
