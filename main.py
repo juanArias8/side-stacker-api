@@ -10,8 +10,7 @@ from database.config import SessionLocal
 from database.config import engine
 from manager.connection_manager import ConnectionManager
 from schemas import schemas
-from schemas.schemas import Room, WebsocketResponse
-from schemas.schemas import RoomBase
+from schemas.schemas import Room
 
 models.Base.metadata.create_all(bind=engine)
 db = SessionLocal()
@@ -42,33 +41,32 @@ async def get_rooms():
 
 
 @app.post("/rooms")
-async def create_room(room: RoomBase):
+async def create_room(room: Room):
     return manager.create_room(room=room)
 
 
 @app.post("/rooms/join")
-async def join_room(room: RoomBase):
+async def join_room(room: Room):
     return manager.join_room(room=room)
 
 
-@app.websocket("/ws/{room}/{number}/{user}")
-async def websocket_endpoint(websocket: WebSocket, room: str, number: int, user: str):
-    await manager.connect(websocket, room, number, user)
+@app.websocket("/ws/{room}/{user}")
+async def websocket_endpoint(websocket: WebSocket, room: str, user: str):
+    await manager.connect(websocket, room, user)
     try:
         while True:
             data = await websocket.receive_json()
-            room_instance = Room(name=data['name'],
-                                 user_1=data['user_1'],
-                                 user_2=data['user_2'],
-                                 next=data['next'],
-                                 winner=data['winner'],
-                                 board=data['board'])
+            room_instance = Room(**data)
+
             room_instance.validate_winner()
             if room_instance.winner:
                 crud.create_room(db, room_instance)
 
-            response = WebsocketResponse(type="DATA", message="New message", data=room_instance)
-            await manager.broadcast_room(room, response)
+            if room_instance.boot:
+                room_instance.make_boot_move()
+
+            room_instance.get_next_player()
+            await manager.broadcast_room(room, room_instance)
     except WebSocketDisconnect:
         await manager.disconnect(room, user)
 

@@ -1,7 +1,9 @@
+import random
 from typing import List
 
 
 def create_board(size: int) -> List[List[str]]:
+    # return [[' ' for _ in range(size)] for _ in range(size)]
     board: List[List[str]] = []
     for index_i in range(size):
         row: List[str] = []
@@ -45,17 +47,27 @@ def get_transposed_matrix(values: List[List[str]]) -> List[List[str]]:
 def count_sequence(values: List[List[str]], symbol: str, amount: int) -> bool:
     for row in values:
         counter = 0
-        for index in range(0, len(row)):
+        for index in range(len(row)):
             counter = counter + 1 if row[index] == symbol else 0
             if counter == amount:
-                print("count sequence true")
                 return True
     return False
 
 
+def get_random_empty_index(values):
+    empty_index = None
+    while True:
+        random_i = random.randint(0, len(values) - 1)
+        for index, value in enumerate(values[random_i]):
+            if value == ' ':
+                empty_index = index
+        if empty_index is not None:
+            return random_i, empty_index
+
+
 if __name__ == '__main__':
-    values = [[1, 0, 1, 0, 1],
-              [1, 0, 0, 0, 0],
-              [1, 0, 1, 1, 0],
-              [1, 1, 0, 1, 0],
-              [1, 1, 0, 1, 0]]
+    values = [['x', ' ', 'x', 'o', 'x'],
+              ['x', ' ', ' ', 'o', 'o'],
+              ['x', 'o', 'x', ' ', 'o'],
+              ['x', 'x', 'o', ' ', 'o'],
+              ['x', ' ', ' ', 'x', 'o']]

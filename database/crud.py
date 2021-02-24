@@ -16,8 +16,8 @@ def get_rooms(db: Session, skip: int = 0, limit: int = 100):
 
 def create_room(db: Session, room: schemas.Room):
     db_room = models.Room(name=room.name,
-                          user_1=room.user_1,
-                          user_2=room.user_2,
+                          user_1=room.player_1.name,
+                          user_2=room.player_2.name,
                           winner=room.winner)
     db.add(db_room)
     db.commit()
