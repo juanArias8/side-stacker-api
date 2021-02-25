@@ -56,19 +56,22 @@ async def websocket_endpoint(websocket: WebSocket, room: str, user: str):
     try:
         while True:
             data = await websocket.receive_json()
-            room_instance = Room(**data)
-
-            room_instance.validate_winner()
-            if room_instance.winner:
-                crud.create_room(db, room_instance)
-
-            if room_instance.boot:
-                room_instance.make_boot_move()
-
-            room_instance.get_next_player()
+            room_instance = get_room_instance_from_data(data)
             await manager.broadcast_room(room, room_instance)
     except WebSocketDisconnect:
         await manager.disconnect(room, user)
+
+
+def get_room_instance_from_data(data):
+    room_instance = Room(**data)
+    room_instance.validate_winner()
+    if room_instance.winner:
+        crud.create_room(db, room_instance)
+    if not room_instance.winner and room_instance.boot:
+        room_instance.make_boot_move()
+
+    room_instance.get_next_player()
+    return room_instance
 
 
 if __name__ == "__main__":

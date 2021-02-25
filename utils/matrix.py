@@ -1,5 +1,5 @@
 import random
-from typing import List
+from typing import List, Any
 
 
 def create_board(size: int) -> List[List[str]]:
@@ -55,14 +55,31 @@ def count_sequence(values: List[List[str]], symbol: str, amount: int) -> bool:
 
 
 def get_random_empty_index(values):
-    empty_index = None
+    visited_rows = [-1] * len(values)
     while True:
-        random_i = random.randint(0, len(values) - 1)
-        for index, value in enumerate(values[random_i]):
-            if value == ' ':
-                empty_index = index
-        if empty_index is not None:
-            return random_i, empty_index
+        random_i = random.randrange(len(values))
+        if get_index(visited_rows, random_i) is None:
+            empty_j = get_index(values[random_i], ' ')
+            if empty_j is not None:
+                return random_i, empty_j
+
+            visited_rows[random_i] = random_i
+            if check_visited_all_rows(visited_rows):
+                raise ValueError('None row have empty value')
+
+
+def get_index(row_values: List[Any], wanted_value: Any):
+    for index, value in enumerate(row_values):
+        if value == wanted_value:
+            return index
+    return None
+
+
+def check_visited_all_rows(visited_rows: List[int]):
+    for index in range(len(visited_rows)):
+        if index != visited_rows[index]:
+            return False
+    return True
 
 
 if __name__ == '__main__':
@@ -71,3 +88,5 @@ if __name__ == '__main__':
               ['x', 'o', 'x', ' ', 'o'],
               ['x', 'x', 'o', ' ', 'o'],
               ['x', ' ', ' ', 'x', 'o']]
+
+    print(check_visited_all_rows([0, 1]))

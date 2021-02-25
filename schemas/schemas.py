@@ -43,10 +43,8 @@ class Room(BaseModel):
         transposed: List[List[str]] = matrix.get_transposed_matrix(self.board)
         diagonals: List[List[str]] = matrix.get_diagonals(self.board)
         diagonals_reversed: List[List[str]] = matrix.get_reversed_diagonals(self.board)
-
         if self.validate_player(symbol_1, transposed, diagonals, diagonals_reversed):
             self.winner = self.player_1.name
-
         if self.validate_player(symbol_2, transposed, diagonals, diagonals_reversed):
             self.winner = self.player_2.name
 
@@ -57,13 +55,13 @@ class Room(BaseModel):
                or matrix.count_sequence(diagonals_reversed, symbol, 4)
 
     def make_boot_move(self):
-        random_i, random_j = matrix.get_random_empty_index(self.board)
+        random_i, empty_j = matrix.get_random_empty_index(self.board)
         random_sense = random.choice(['l', 'r'])
+        self.board[random_i].pop(empty_j)
         if random_sense == 'l':
             self.board[random_i].insert(0, 'o')
         else:
             self.board[random_i].append('o')
-        self.board[random_i].pop(random_j)
 
     class config:
         orm_mode = True
